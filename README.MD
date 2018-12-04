@@ -5,6 +5,11 @@
 - Java 8
 - Docker
 
+## Step to run the code
+
+1. Run the mongodb container.
+2. Run the code through gradle.
+
 ## Run mongo DB in it's own container
 
 Run Mongo DB on port 2777:
