@@ -1,11 +1,58 @@
 # Trade Ledger: Spring boot and MongoDB
 
+All requested features have been implemented.
+Please read the notes.
+TL;DR Skip to "Steps to run the code".
+
 ## Requirements
 
 - Java 8
 - Docker
 
-## Step to run the code
+## Notes
+
+### Tackling the reserved `_id` problem
+
+#### Challenges
+
+- `_id` is reserved in MongoDB and after import it lacks ObjectId definition, hence the field is not searchable.
+- Possible approaches considered were to:
+- - Programmatically importing the data so the object id could be created properly.
+- - `sed` the `_id` field to modify it to something like `"_id":{"$oid":"5c0716d2ae04d039cc55b38f"}`
+- - `sed` the `_id` to change it to something like `document_id` and auto generate `_id`. This approach required least processing IMO.
+- - The solution I ended up taking which is a hybrid, main benefit being speeding up my development time.
+
+#### Solution
+
+When the application is run, it runs a migration script that copies all the `_id` values into a `document_id` field.
+When you try to fetch by `_id` the application will actually search on `document_id`
+
+### Tacking the JSON Object as Query parameter
+
+#### Challenge
+
+- Even after URLEscaping the JSON string, it's still not URL safe.
+- Possible solutions considered:
+- - Using `GET` with a body, this is allowed by the HTTP specifications, though it can be problematic with libraries. However the project specifically called for a query parameter.
+- - Using `POST` with body. Same issue as above, plus, it's a `POST` and the requirement is for a `GET`.
+
+#### Solution
+
+The requirements did not specify how the JSON object should be encoded or, that it should be plain text.
+As such I chose to encode it as Base64 and URL escape it (Sample below in the RUN section and the unit tests).
+
+### Unit tests
+
+Not as through as I would like. However, this has taken a lot of time and I've add an example demonstrating object mocking.
+Really, any more unit tests I write will just be the same thing rehashed in different ways.
+
+### Code structure
+
+The code uses an MVC structure. One optimization I would have liked would be to add Promise to Repository queries.
+However, since Spring uses Tomcat which implement a threadpool, the benefits of this are debateable.
+
+
+## Steps to run the code
 
 1. Run the mongodb container.
 2. Drop into the mongodb container bash shell and import data
@@ -21,8 +68,6 @@ Run MongoDB on port 2777:
 
 ```
 docker run -it --rm --name mongodb -p 27777:27017 -e MONGODB_USERNAME=my_user -e MONGODB_PASSWORD=password123 -e MONGODB_DATABASE=my_database -v $PWD/sample-data:/sample-data bitnami/mongodb:latest
-## OR
-docker run -it --rm --name mongodb -p 27777:27017 -v $PWD/sample-data:/sample-data bitnami/mongodb:latest
 ```
 
 ## 2. Drop into the mongodb bash shell and import `sample-data`
@@ -35,7 +80,9 @@ docker exec -it mongodb bash
 ## Once you drop into bash
 ## You can run:
 cd sample-data && ./import-data
-## Or, do it manually
+## NOTE: If because of Windows line end the script doesn't work, do it manually
+## Or, open the script in vim and save the file in linux format `:set ff=unix` then `:wq`.
+## Commands to do it manually
 mongoimport --username my_user --password "password123" --db my_database --collection users --file sample-data/users.json --jsonArray
 mongoimport --username my_user --password "password123" --db my_database --collection events --file sample-data/events.json --jsonArray
 ```
