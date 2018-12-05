@@ -1,7 +1,6 @@
 package com.alimuzaffar;
 
-import com.alimuzaffar.domain.Domain;
-import com.alimuzaffar.domain.DomainRepository;
+import com.alimuzaffar.domain.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -23,39 +22,38 @@ public class Application {
     }
 
     @Bean
-    CommandLineRunner init(DomainRepository domainRepository) {
+    CommandLineRunner init(UserRepository userRepository, EventRepository eventRepository) {
 
         return args -> {
-
-            Optional<Domain> obj = domainRepository.findById(7L);
+            userRepository.updateIds();
+            eventRepository.updateIds();
+            // These are just tests to see if our repo is working
+            User obj = userRepository.findByUserId("507f191e810c19729de860e1");
+            Event obj2 = eventRepository.findByEventId("507f191e810c19729de8aae0");
             System.out.println(obj);
-
-            Domain obj2 = domainRepository.findFirstByDomain("alimuzaffar.com");
             System.out.println(obj2);
-
-            //obj2.setDisplayAds(true);
-            //domainRepository.save(obj2);
-
-            //int n = domainRepository.updateDomain("mkyong.com", true);
-            //System.out.println("Number of records updated : " + n);
-
-            //Domain obj3 = domainRepository.findOne(2000001L);
-            //System.out.println(obj3);
-
-            //Domain obj4 = domainRepository.findCustomByDomain("google.com");
-            //System.out.println(obj4);
-
-            //List<Domain> obj5 = domainRepository.findCustomByRegExDomain("google");
-            //obj5.forEach(x -> System.out.println(x));
-
+            System.out.println("          ____  \n" +
+                    "        o8%8888,    \n" +
+                    "      o88%8888888.  \n" +
+                    "     8'-    -:8888b   \n" +
+                    "    8'         8888  \n" +
+                    "   d8.-=. ,==-.:888b  \n" +
+                    "   >8 `~` :`~' d8888   \n" +
+                    "   88         ,88888   \n" +
+                    "   88b. `-~  ':88888  \n" +
+                    "   888b ~==~ .:88888 \n" +
+                    "   88888o--:':::8888      \n" +
+                    "   `88888| :::' 8888b  \n" +
+                    "   8888^^'       8888b  \n" +
+                    "  d888           ,%888b.   \n" +
+                    " d88%            %%%8--'-.  \n" +
+                    "/88:.__ ,       _%-' ---  -  \n" +
+                    "    '''::===..-'   =  --.");
+            System.out.println("All good!");
         };
 
     }
 
-    //remove _class
-        /*MappingMongoConverter converter =
-                new MappingMongoConverter(mongoDbFactory, new MongoMappingContext());
-        converter.setTypeMapper(new DefaultMongoTypeMapper(null));*/
     @Bean
     public MongoTemplate mongoTemplate(MongoDbFactory mongoDbFactory,
                                        MongoMappingContext context) {
